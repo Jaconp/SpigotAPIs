@@ -46,6 +46,7 @@ public class EnchantBuilder {
                 conflicts, canEnchant);
         Enchantment alreadyThere = Enchantment.getByKey(key);
         if (alreadyThere == null || !EnchantUtil.areEqual(enchantment, alreadyThere)){
+            if (alreadyThere != null) EnchantUtil.deregister(alreadyThere);
             try {
                 Field field = Enchantment.class.getDeclaredField("acceptingNew");
                 field.setAccessible(true);
@@ -56,9 +57,7 @@ public class EnchantBuilder {
                     Bukkit.getPluginManager().registerEvents(enchantListener, plugin);
                 }
                 ((EnchantWrapper) enchantment).setEnchantListeners(enchantListeners);
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
+            } catch (NoSuchFieldException | IllegalAccessException ignored) {}
         }else {
             enchantment = alreadyThere;
         }
