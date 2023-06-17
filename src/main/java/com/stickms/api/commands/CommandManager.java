@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public abstract class CommandManager extends BukkitCommand {
+    private List<SubCommand> subCommands;
     public CommandManager(String command, String[] aliases, String description, String usage){
         this(command, aliases, description, usage, null);
     }
@@ -31,10 +32,12 @@ public abstract class CommandManager extends BukkitCommand {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
+        this.subCommands = new ArrayList<>();
     }
 
     @Override
     public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, String[] args) {
+        for (SubCommand subCommand : this.subCommands) if (subCommand.validate(sender, args)) return false;
         execute(sender, args);
         if (sender instanceof Player) playerExecute((Player) sender, args);
         else if (sender instanceof ConsoleCommandSender) consoleExecute((ConsoleCommandSender) sender, args);
@@ -50,6 +53,7 @@ public abstract class CommandManager extends BukkitCommand {
     public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, String[] args) throws IllegalArgumentException {
         return onTabComplete(sender, args);
     }
-    public List<String> onTabComplete(CommandSender sender, String[] args){return new ArrayList<>();};
+    public List<String> onTabComplete(CommandSender sender, String[] args){return new ArrayList<>();}
 
+    public void addSubCommands(SubCommand... subCommands){this.subCommands.addAll(Arrays.asList(subCommands));}
 }
