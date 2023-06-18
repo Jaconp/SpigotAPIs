@@ -4,12 +4,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class EnchantBuilder {
@@ -40,29 +43,38 @@ public class EnchantBuilder {
     }
 
     public Enchantment build(Plugin plugin){
-        Enchantment enchantment = new EnchantWrapper(
+        Enchantment enchantWrapper = new EnchantWrapper(
                 key,
                 name, startLevel, maxLevel, target, treasure, cursed,
                 conflicts, canEnchant);
+        addListener(new EnchantListener(){
+            @EventHandler(ignoreCancelled = true)
+            public void onEnchant(EnchantItemEvent e){
+                if (!e.getEnchantsToAdd().containsKey(enchantment)) return;
+                e.setCancelled(true);
+                for (Map.Entry<Enchantment, Integer> entry : e.getEnchantsToAdd().entrySet())
+                    EnchantUtil.applyEnchantment(e.getItem(), entry.getKey(), entry.getValue());
+            }
+        });
         Enchantment alreadyThere = Enchantment.getByKey(key);
-        if (alreadyThere == null || !EnchantUtil.areEqual(enchantment, alreadyThere)){
+        if (alreadyThere == null || !EnchantUtil.areEqual(enchantWrapper, alreadyThere)){
             if (alreadyThere != null) EnchantUtil.deregister(alreadyThere);
             try {
                 Field field = Enchantment.class.getDeclaredField("acceptingNew");
                 field.setAccessible(true);
                 field.set(null, true);
-                Enchantment.registerEnchantment(enchantment);
+                Enchantment.registerEnchantment(enchantWrapper);
                 for (EnchantListener enchantListener : enchantListeners){
-                    enchantListener.setEnchantment(enchantment);
+                    enchantListener.setEnchantment(enchantWrapper);
                     Bukkit.getPluginManager().registerEvents(enchantListener, plugin);
                 }
-                ((EnchantWrapper) enchantment).setEnchantListeners(enchantListeners);
+                ((EnchantWrapper) enchantWrapper).setEnchantListeners(enchantListeners);
             } catch (NoSuchFieldException | IllegalAccessException ignored) {}
         }else {
-            enchantment = alreadyThere;
+            enchantWrapper = alreadyThere;
         }
 
-        return enchantment;
+        return enchantWrapper;
     }
 
     public EnchantBuilder setName(String name){
