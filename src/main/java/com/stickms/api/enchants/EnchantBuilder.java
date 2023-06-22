@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class EnchantBuilder {
+public class EnchantBuilder{
+    private final Plugin plugin;
     private final NamespacedKey key;
     private String name;
     private int startLevel;
@@ -23,26 +24,26 @@ public class EnchantBuilder {
     private EnchantmentTarget target;
     private boolean treasure;
     private boolean cursed;
-    private Function<Enchantment, Boolean> conflicts;
+    private Enchantment[] conflicts;
     private Function<ItemStack, Boolean> canEnchant;
     private List<EnchantListener> enchantListeners;
 
-    public EnchantBuilder(String minecraftKey){this(NamespacedKey.minecraft(minecraftKey));}
-    public EnchantBuilder(Plugin plugin, String key){this(new NamespacedKey(plugin, key));}
-    public EnchantBuilder(NamespacedKey key){
-        this.key = key;
-        this.name = key.getKey();
+    public EnchantBuilder(Plugin plugin, String key){this(plugin, key, false);}
+    public EnchantBuilder(Plugin plugin, String key, boolean minecraftNamespace){
+        this.plugin = plugin;
+        this.key = minecraftNamespace ? NamespacedKey.minecraft(key) : new NamespacedKey(plugin, key);
+        this.name = key;
         this.startLevel = 1;
         this.maxLevel = 1;
         this.target = EnchantmentTarget.ALL;
         this.treasure = false;
         this.cursed = false;
-        this.conflicts = (enchantment)-> false;
+        this.conflicts = new Enchantment[0];
         this.canEnchant = (itemStack)->false;
         this.enchantListeners = new ArrayList<>();
     }
 
-    public Enchantment build(Plugin plugin){
+    public Enchantment build(){
         Enchantment enchantWrapper = new EnchantWrapper(
                 key,
                 name, startLevel, maxLevel, target, treasure, cursed,
@@ -81,6 +82,11 @@ public class EnchantBuilder {
         this.name = name;
         return this;
     }
+    public EnchantBuilder setLevelRange(int startLevel, int maxLevel){
+        this.startLevel = startLevel;
+        this.maxLevel = maxLevel;
+        return this;
+    }
     public EnchantBuilder setStartLevel(int startLevel){
         this.startLevel = startLevel;
         return this;
@@ -101,7 +107,7 @@ public class EnchantBuilder {
         this.cursed = cursed;
         return this;
     }
-    public EnchantBuilder conflicts(Function<Enchantment, Boolean> conflicts){
+    public EnchantBuilder conflicts(Enchantment... conflicts){
         this.conflicts = conflicts;
         return this;
     }
