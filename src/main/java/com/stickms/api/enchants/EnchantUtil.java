@@ -13,7 +13,14 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 @SuppressWarnings("ConstantConditions")
-public class EnchantUtil {
+public final class EnchantUtil {
+
+    private static final Set<Enchantment> DEFAULT_ENCHANTMENTS = Set.of(Enchantment.values());
+
+    private EnchantUtil() {
+        throw new UnsupportedOperationException("Utility class cannot be initiated.");
+    }
+
     public static boolean areEqual(Enchantment first, Enchantment second){
         if (first == null || second == null) return false;
         if (!(first.getKey().equals(second.getKey()) && first.getName().equals(second.getName())
@@ -69,48 +76,8 @@ public class EnchantUtil {
         itemStack.setItemMeta(itemMeta);
         return itemStack;
     }
-    public static List<Enchantment> getDefaultEnchants(){
-        List<Enchantment> enchantments = new ArrayList<>();
-        enchantments.add(Enchantment.PROTECTION_ENVIRONMENTAL);
-        enchantments.add(Enchantment.PROTECTION_FIRE);
-        enchantments.add(Enchantment.PROTECTION_FALL);
-        enchantments.add(Enchantment.PROTECTION_EXPLOSIONS);
-        enchantments.add(Enchantment.PROTECTION_PROJECTILE);
-        enchantments.add(Enchantment.OXYGEN);
-        enchantments.add(Enchantment.WATER_WORKER);
-        enchantments.add(Enchantment.THORNS);
-        enchantments.add(Enchantment.DEPTH_STRIDER);
-        enchantments.add(Enchantment.FROST_WALKER);
-        enchantments.add(Enchantment.BINDING_CURSE);
-        enchantments.add(Enchantment.DAMAGE_ALL);
-        enchantments.add(Enchantment.DAMAGE_UNDEAD);
-        enchantments.add(Enchantment.DAMAGE_ARTHROPODS);
-        enchantments.add(Enchantment.KNOCKBACK);
-        enchantments.add(Enchantment.FIRE_ASPECT);
-        enchantments.add(Enchantment.LOOT_BONUS_MOBS);
-        enchantments.add(Enchantment.SWEEPING_EDGE);
-        enchantments.add(Enchantment.DIG_SPEED);
-        enchantments.add(Enchantment.SILK_TOUCH);
-        enchantments.add(Enchantment.DURABILITY);
-        enchantments.add(Enchantment.LOOT_BONUS_BLOCKS);
-        enchantments.add(Enchantment.ARROW_DAMAGE);
-        enchantments.add(Enchantment.ARROW_KNOCKBACK);
-        enchantments.add(Enchantment.ARROW_FIRE);
-        enchantments.add(Enchantment.ARROW_INFINITE);
-        enchantments.add(Enchantment.LUCK);
-        enchantments.add(Enchantment.LURE);
-        enchantments.add(Enchantment.LOYALTY);
-        enchantments.add(Enchantment.IMPALING);
-        enchantments.add(Enchantment.RIPTIDE);
-        enchantments.add(Enchantment.CHANNELING);
-        enchantments.add(Enchantment.MULTISHOT);
-        enchantments.add(Enchantment.QUICK_CHARGE);
-        enchantments.add(Enchantment.PIERCING);
-        enchantments.add(Enchantment.MENDING);
-        enchantments.add(Enchantment.VANISHING_CURSE);
-        enchantments.add(Enchantment.SWIFT_SNEAK);
-        enchantments.add(Enchantment.SOUL_SPEED);
-        return enchantments;
+    public static Set<Enchantment> getDefaultEnchants(){
+        return DEFAULT_ENCHANTMENTS;
     }
     public static String romanNumeral(int level){
         String[] ones = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
