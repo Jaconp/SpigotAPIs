@@ -16,14 +16,14 @@ public class EnchantWrapper extends Enchantment {
     private final EnchantmentTarget target;
     private final boolean treasure;
     private final boolean cursed;
-    private final Function<Enchantment, Boolean> conflicts;
+    private final Enchantment[] conflicts;
     private final Function<ItemStack, Boolean> canEnchant;
     private List<EnchantListener> enchantListeners;
 
     public EnchantWrapper(
             NamespacedKey key,
             String name, int startLevel, int maxLevel, EnchantmentTarget target, boolean treasure, boolean cursed,
-            Function<Enchantment, Boolean> conflicts, Function<ItemStack, Boolean> canEnchant) {
+            Enchantment[] conflicts, Function<ItemStack, Boolean> canEnchant) {
         super(key);
         this.name = name;
         this.startLevel = startLevel;
@@ -54,7 +54,10 @@ public class EnchantWrapper extends Enchantment {
     public boolean isCursed() {return cursed;}
 
     @Override
-    public boolean conflictsWith(@NotNull Enchantment enchantment) {return conflicts.apply(enchantment);}
+    public boolean conflictsWith(@NotNull Enchantment enchantment) {
+        for (Enchantment ench : conflicts) if (enchantment.equals(ench)) return false;
+        return true;
+    }
 
     @Override
     public boolean canEnchantItem(@NotNull ItemStack itemStack) {return canEnchant.apply(itemStack);}
