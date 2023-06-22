@@ -14,9 +14,7 @@ import java.util.*;
 
 @SuppressWarnings("ConstantConditions")
 public final class EnchantUtil {
-
-    private static final Set<Enchantment> DEFAULT_ENCHANTMENTS = Set.of(Enchantment.values());
-
+    public static final Set<Enchantment> DEFAULT_ENCHANTMENTS = Set.of(Enchantment.values());
     private EnchantUtil() {
         throw new UnsupportedOperationException("Utility class cannot be initiated.");
     }
@@ -62,7 +60,7 @@ public final class EnchantUtil {
     public static ItemStack applyEnchantment(ItemStack itemStack, Enchantment enchantment, int level){
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.addEnchant(enchantment, level, true);
-        if (getDefaultEnchants().contains(enchantment)){
+        if (DEFAULT_ENCHANTMENTS.contains(enchantment)){
             itemStack.setItemMeta(itemMeta);
             return itemStack;
         }
@@ -75,9 +73,6 @@ public final class EnchantUtil {
         }
         itemStack.setItemMeta(itemMeta);
         return itemStack;
-    }
-    public static Set<Enchantment> getDefaultEnchants(){
-        return DEFAULT_ENCHANTMENTS;
     }
     public static String romanNumeral(int level){
         String[] ones = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
