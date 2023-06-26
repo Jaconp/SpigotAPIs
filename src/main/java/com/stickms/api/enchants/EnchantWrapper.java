@@ -55,8 +55,8 @@ public class EnchantWrapper extends Enchantment {
 
     @Override
     public boolean conflictsWith(@NotNull Enchantment enchantment) {
-        for (Enchantment ench : conflicts) if (enchantment.equals(ench)) return false;
-        return true;
+        for (Enchantment ench : conflicts) if (enchantment.equals(ench)) return true;
+        return false;
     }
 
     @Override
