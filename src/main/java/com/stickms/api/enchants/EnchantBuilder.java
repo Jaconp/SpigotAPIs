@@ -1,6 +1,7 @@
 package com.stickms.api.enchants;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
@@ -11,9 +12,10 @@ import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class EnchantBuilder{
     private final Plugin plugin;
@@ -25,7 +27,7 @@ public class EnchantBuilder{
     private boolean treasure;
     private boolean cursed;
     private Enchantment[] conflicts;
-    private Function<ItemStack, Boolean> canEnchant;
+    private Predicate<ItemStack> canEnchant;
     private List<EnchantListener> enchantListeners;
 
     public EnchantBuilder(Plugin plugin, String key){this(plugin, key, false);}
@@ -39,12 +41,12 @@ public class EnchantBuilder{
         this.treasure = false;
         this.cursed = false;
         this.conflicts = new Enchantment[0];
-        this.canEnchant = (itemStack)->false;
+        this.canEnchant = itemStack->false;
         this.enchantListeners = new ArrayList<>();
     }
 
     public Enchantment build(){
-        Enchantment enchantWrapper = new EnchantWrapper(
+        EnchantWrapper enchantWrapper = new EnchantWrapper(
                 key,
                 name, startLevel, maxLevel, target, treasure, cursed,
                 conflicts, canEnchant);
@@ -58,22 +60,18 @@ public class EnchantBuilder{
             }
         });
         Enchantment alreadyThere = Enchantment.getByKey(key);
-        if (alreadyThere == null || !EnchantUtil.areEqual(enchantWrapper, alreadyThere)){
-            if (alreadyThere != null) EnchantUtil.deregister(alreadyThere);
-            try {
-                Field field = Enchantment.class.getDeclaredField("acceptingNew");
-                field.setAccessible(true);
-                field.set(null, true);
-                Enchantment.registerEnchantment(enchantWrapper);
-                for (EnchantListener enchantListener : enchantListeners){
-                    enchantListener.setEnchantment(enchantWrapper);
-                    Bukkit.getPluginManager().registerEvents(enchantListener, plugin);
-                }
-                ((EnchantWrapper) enchantWrapper).setEnchantListeners(enchantListeners);
-            } catch (NoSuchFieldException | IllegalAccessException ignored) {}
-        }else {
-            enchantWrapper = alreadyThere;
-        }
+        if (alreadyThere != null) EnchantUtil.deregister(alreadyThere);
+        try {
+            Field field = Enchantment.class.getDeclaredField("acceptingNew");
+            field.setAccessible(true);
+            field.set(null, true);
+            Enchantment.registerEnchantment(enchantWrapper);
+            for (EnchantListener enchantListener : enchantListeners){
+                enchantListener.setEnchantment(enchantWrapper);
+                Bukkit.getPluginManager().registerEvents(enchantListener, plugin);
+            }
+            enchantWrapper.setEnchantListeners(enchantListeners);
+        } catch (NoSuchFieldException | IllegalAccessException ignored) {}
 
         return enchantWrapper;
     }
@@ -111,7 +109,12 @@ public class EnchantBuilder{
         this.conflicts = conflicts;
         return this;
     }
-    public EnchantBuilder canEnchant(Function<ItemStack, Boolean> canEnchant){
+    public EnchantBuilder canEnchant(Material... canEnchantMaterials){
+        this.canEnchant = itemStack -> Arrays.stream(canEnchantMaterials)
+                .anyMatch(material -> itemStack.getType().equals(material));
+        return this;
+    }
+    public EnchantBuilder canEnchant(Predicate<ItemStack> canEnchant){
         this.canEnchant = canEnchant;
         return this;
     }

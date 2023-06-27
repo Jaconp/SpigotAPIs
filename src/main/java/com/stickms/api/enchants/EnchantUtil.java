@@ -15,25 +15,8 @@ import java.util.*;
 @SuppressWarnings("ConstantConditions")
 public final class EnchantUtil {
     public static final Set<Enchantment> DEFAULT_ENCHANTMENTS = Set.of(Enchantment.values());
-    private EnchantUtil() {
-        throw new UnsupportedOperationException("Utility class cannot be initiated.");
-    }
+    private EnchantUtil() {throw new UnsupportedOperationException("Utility class cannot be initiated.");}
 
-    public static boolean areEqual(Enchantment first, Enchantment second){
-        if (first == null || second == null) return false;
-        if (!(first.getKey().equals(second.getKey()) && first.getName().equals(second.getName())
-                && first.getStartLevel() == second.getStartLevel() && first.getMaxLevel() == second.getMaxLevel()
-                && first.getItemTarget() == second.getItemTarget() && first.isTreasure() == second.isTreasure()
-                && first.isCursed() == second.isCursed() && first.getClass() == second.getClass())) return false;
-        for (Enchantment enchantment : Enchantment.values()){
-            if (first.conflictsWith(enchantment) != second.conflictsWith(enchantment)) return false;
-        }
-        for (Material material : Material.values()){
-            if (!material.isItem()) continue;
-            if (first.canEnchantItem(new ItemStack(material)) != second.canEnchantItem(new ItemStack(material))) return false;
-        }
-        return true;
-    }
     public static void deregister(NamespacedKey enchantKey){
         Enchantment enchantment = Enchantment.getByKey(enchantKey);
         if (enchantment == null) return;
@@ -79,7 +62,6 @@ public final class EnchantUtil {
         String[] tens = {"", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
         String[] hrns = {"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
         String[] ths = {"", "M", "MM", "MMM"};
-
         return ths[level / 1000] + hrns[(level % 1000) / 100] + tens[(level % 100) / 10] + ones[level % 10];
     }
 }
