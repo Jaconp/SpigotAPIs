@@ -1,16 +1,19 @@
 package com.stickms.api.enchants;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 @SuppressWarnings("ConstantConditions")
 public final class EnchantUtil {
@@ -42,7 +45,9 @@ public final class EnchantUtil {
     }
     public static ItemStack applyEnchantment(ItemStack itemStack, Enchantment enchantment, int level){
         ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.addEnchant(enchantment, level, true);
+        if (itemMeta.getEnchantLevel(enchantment) != level) {
+            itemMeta.addEnchant(enchantment, level, true);
+        }
         if (DEFAULT_ENCHANTMENTS.contains(enchantment)){
             itemStack.setItemMeta(itemMeta);
             return itemStack;
@@ -56,6 +61,10 @@ public final class EnchantUtil {
         }
         itemStack.setItemMeta(itemMeta);
         return itemStack;
+    }
+    public static boolean hasEnchantMainHand(Player player, Enchantment enchantment){
+        return player.getInventory().getItemInMainHand() != null &&
+                player.getInventory().getItemInMainHand().containsEnchantment(enchantment);
     }
     public static String romanNumeral(int level){
         String[] ones = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
