@@ -14,7 +14,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 
 public class EnchantBuilder{
@@ -45,18 +44,16 @@ public class EnchantBuilder{
         this.enchantListeners = new ArrayList<>();
     }
 
-    public Enchantment build(){
+    public EnchantWrapper build(){
         EnchantWrapper enchantWrapper = new EnchantWrapper(
                 key,
                 name, startLevel, maxLevel, target, treasure, cursed,
                 conflicts, canEnchant);
-        addListener(new EnchantListener(){
+        this.enchantListeners.add(new EnchantListener(){
             @EventHandler(ignoreCancelled = true)
             public void onEnchant(EnchantItemEvent e){
                 if (!e.getEnchantsToAdd().containsKey(enchantment)) return;
-                e.setCancelled(true);
-                for (Map.Entry<Enchantment, Integer> entry : e.getEnchantsToAdd().entrySet())
-                    EnchantUtil.applyEnchantment(e.getItem(), entry.getKey(), entry.getValue());
+                EnchantUtil.applyEnchantment(e.getItem(), enchantment, e.getEnchantsToAdd().get(enchantment));
             }
         });
         Enchantment alreadyThere = Enchantment.getByKey(key);
@@ -118,12 +115,25 @@ public class EnchantBuilder{
         this.canEnchant = canEnchant;
         return this;
     }
+
     public EnchantBuilder addListener(EnchantListener listener){
         this.enchantListeners.add(listener);
         return this;
     }
+    public EnchantBuilder addListeners(EnchantListener... listeners){
+        this.enchantListeners.addAll(Arrays.asList(listeners));
+        return this;
+    }
+    public EnchantBuilder addListeners(List<EnchantListener> listeners){
+        this.enchantListeners.addAll(listeners);
+        return this;
+    }
+    public EnchantBuilder setListeners(EnchantListener... listeners){
+        this.enchantListeners = new ArrayList<>(Arrays.asList(listeners));
+        return this;
+    }
     public EnchantBuilder setListeners(List<EnchantListener> listeners){
-        this.enchantListeners = listeners;
+        this.enchantListeners = new ArrayList<>(listeners);
         return this;
     }
 }
