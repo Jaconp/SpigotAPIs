@@ -46,4 +46,10 @@ public abstract class EnchantListenerImpl extends EnchantListener{
         this.onConsume(event);
     }
     public void onConsume(PlayerItemConsumeEvent event){}
+    @EventHandler
+    public void interact(PlayerInteractEvent event){
+        if (!EnchantUtil.hasEnchantMainHand(event.getPlayer(), enchantment)) return;
+        this.onInteract(event);
+    }
+    public void onInteract(PlayerInteractEvent event){}
 }
