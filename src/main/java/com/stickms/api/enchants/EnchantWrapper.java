@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class EnchantWrapper extends Enchantment {
     private final String name;
@@ -17,13 +17,13 @@ public class EnchantWrapper extends Enchantment {
     private final boolean treasure;
     private final boolean cursed;
     private final Enchantment[] conflicts;
-    private final Function<ItemStack, Boolean> canEnchant;
+    private final Predicate<ItemStack> canEnchant;
     private List<EnchantListener> enchantListeners;
 
     public EnchantWrapper(
             NamespacedKey key,
             String name, int startLevel, int maxLevel, EnchantmentTarget target, boolean treasure, boolean cursed,
-            Enchantment[] conflicts, Function<ItemStack, Boolean> canEnchant) {
+            Enchantment[] conflicts, Predicate<ItemStack> canEnchant) {
         super(key);
         this.name = name;
         this.startLevel = startLevel;
@@ -58,9 +58,8 @@ public class EnchantWrapper extends Enchantment {
         for (Enchantment ench : conflicts) if (enchantment.equals(ench)) return true;
         return false;
     }
-
     @Override
-    public boolean canEnchantItem(@NotNull ItemStack itemStack) {return canEnchant.apply(itemStack);}
+    public boolean canEnchantItem(@NotNull ItemStack itemStack) {return canEnchant.test(itemStack);}
 
     public List<EnchantListener> getEnchantListeners() {return enchantListeners;}
     public void setEnchantListeners(List<EnchantListener> enchantListeners) {this.enchantListeners = enchantListeners;}
